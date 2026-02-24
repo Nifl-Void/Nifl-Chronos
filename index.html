@@ -21,7 +21,6 @@
             display: flex; align-items: center; justify-content: center; overflow: hidden; 
         }
 
-        /* NÁZEV */
         h1.main-title { 
             position: absolute; top: 8vh; font-size: clamp(14px, 3vw, 20px); 
             letter-spacing: 0.8em; color: var(--grey-dim); z-index: 100; margin: 0; 
@@ -33,7 +32,6 @@
 
         .container { position: relative; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; z-index: 10; }
 
-        /* ŽBLUŇK EFEKT */
         .ripple-container {
             position: absolute; width: 100%; height: 100%;
             display: flex; align-items: center; justify-content: center;
@@ -49,7 +47,6 @@
             100% { width: 200vmin; height: 200vmin; opacity: 0; transform: scale(1); }
         }
 
-        /* VRSTVY */
         .view-layer { 
             position: absolute; display: flex; flex-direction: column; align-items: center; 
             width: 100%; height: 100%; justify-content: center; 
@@ -57,7 +54,6 @@
         }
         .hidden { display: none !important; opacity: 0; }
 
-        /* GHOST RUNY - KLÍČOVÁ OPRAVA */
         .ghost-rune { 
             position: absolute; pointer-events: none; z-index: 1; 
             filter: blur(1px); will-change: transform, opacity;
@@ -70,7 +66,6 @@
             100% { opacity: 0; transform: translateY(-80px) scale(1.2); } 
         }
 
-        /* ČAS & RUNY */
         .center-group { display: flex; flex-direction: column; align-items: center; cursor: pointer; z-index: 20; transition: 0.6s; }
         .center-time { font-size: clamp(50px, 12vmin, 90px); color: var(--gold); letter-spacing: 8px; font-weight: 200; }
         .current-rune-main { font-size: 35px; color: var(--text); margin-top: 10px; }
@@ -81,7 +76,6 @@
         }
         .active-rune { color: var(--gold) !important; filter: drop-shadow(0 0 12px var(--gold)); }
 
-        /* VÖLVA */
         .volva-input { 
             background: transparent; border: none; border-bottom: 1px solid var(--dim); 
             color: white; text-align: center; outline: none; margin-bottom: 50px; 
@@ -89,12 +83,10 @@
         }
         .fate-rune-btn { font-size: 90px; color: var(--gold); cursor: pointer; transition: 0.6s; z-index: 30; }
 
-        /* KALENDÁŘ */
         .calendar-box { width: 350px; text-align: center; z-index: 30; }
         .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 15px; color: #444; }
-        .day.today { color: var(--gold); border: 1px solid var(--gold-low); }
+        .day.today { color: var(--gold); border: 1px solid var(--gold); }
 
-        /* ORACLE BOX */
         .oracle-box { 
             position: absolute; top: 120%; width: 300px; padding: 20px; 
             background: rgba(10,10,10,0.95); border: 1px solid var(--gold); 
@@ -165,24 +157,17 @@
         const ghost = document.createElement('div');
         ghost.className = 'ghost-rune';
         ghost.textContent = runesAll[Math.floor(Math.random() * runesAll.length)];
-        
-        // Náhodná pozice po celém okně
         ghost.style.left = Math.random() * 95 + "vw";
         ghost.style.top = Math.random() * 95 + "vh";
-        
-        // Náhodná barva (Zlatá, Bílá, Šedá)
         const colors = ["#bd9b5d", "#ffffff", "#555555", "#222222"];
         ghost.style.color = colors[Math.floor(Math.random() * colors.length)];
-        
         ghost.style.fontSize = (Math.random() * 40 + 20) + "px";
         ghost.style.setProperty('--target-op', Math.random() * 0.4 + 0.1);
-        
         document.body.appendChild(ghost);
         setTimeout(() => ghost.remove(), 6000);
     }
 
     function switchView(target) {
-        // Žbluňk
         [1, 2].forEach(i => {
             const r = document.getElementById(`r${i}`);
             r.style.animation = 'none'; void r.offsetWidth;
@@ -196,7 +181,7 @@
             if (target === 'to-volva') {
                 document.getElementById('view-volva').classList.remove('hidden');
                 currentMode = 'volva';
-                ghostInterval = setInterval(spawnGhostRune, 400); // Rychlejší spawnování
+                ghostInterval = setInterval(spawnGhostRune, 400);
             } else if (target === 'to-cal') {
                 document.getElementById('view-cal').classList.remove('hidden');
                 renderCalendar();
@@ -229,7 +214,6 @@
         const box = document.getElementById('oracle-box');
         box.textContent = "Osud vlní tvou cestu k nečekaným břehům.";
         box.classList.add('visible');
-        // Extra runy při věštbě
         for(let i=0; i<12; i++) setTimeout(spawnGhostRune, i*100);
         setTimeout(() => box.classList.remove('visible'), 6000);
     }
