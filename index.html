@@ -3,29 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nifl-Chronos | Ghost Runes Return</title>
+    <title>NIFL-CHRONOS | Ghost Runes</title>
     <style>
         :root { 
             --gold: #bd9b5d; 
             --bg: #050505; 
-            --text: #8b949e; 
-            --grey-dim: #555555;
-            --dim: #2a2a2a; 
-            --gold-glow: rgba(189,155,93,0.5);
+            --dim: #1a1a1a; 
+            --text: #e0e0e0; 
+            --glow: rgba(189,155,93,0.2);
+            --font-sys: 'Courier New', monospace;
         }
         
         body, html { 
             margin: 0; padding: 0; width: 100%; height: 100%; 
-            background-color: var(--bg); color: #e0e0e0;
+            background-color: var(--bg); color: var(--text);
             font-family: "Segoe UI", sans-serif; 
             display: flex; align-items: center; justify-content: center; overflow: hidden; 
         }
 
+        /* Návratové tlačítko */
+        .back-to-pulse {
+            position: fixed; top: 20px; left: 20px; z-index: 1000;
+            color: var(--text); text-decoration: none; font-family: var(--font-sys);
+            font-size: 12px; border: 1px solid var(--dim); padding: 10px 15px;
+            background: rgba(10,10,10,0.8); transition: 0.3s; letter-spacing: 2px;
+        }
+        .back-to-pulse:hover {
+            border-color: var(--gold); color: #fff; background: rgba(189,155,93,0.1);
+        }
+
         h1.main-title { 
             position: absolute; top: 8vh; font-size: clamp(14px, 3vw, 20px); 
-            letter-spacing: 0.8em; color: var(--grey-dim); z-index: 100; margin: 0; 
+            letter-spacing: 0.8em; color: #555; z-index: 100; margin: 0; 
             text-transform: uppercase; cursor: default;
             transition: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-family: var(--font-sys);
         }
         h1.main-title span { color: var(--gold); transition: 0.8s ease; }
         h1.main-title:hover { transform: scale(1.05); letter-spacing: 1em; }
@@ -33,76 +45,54 @@
         .container { position: relative; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; z-index: 10; }
 
         .ripple-container {
-            position: absolute; width: 100%; height: 100%;
-            display: flex; align-items: center; justify-content: center;
-            pointer-events: none; z-index: 999;
+            position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 999;
         }
         .ripple { 
             position: absolute; border: 2px solid var(--gold); border-radius: 50%; 
-            opacity: 0; box-shadow: 0 0 20px var(--gold-glow);
-            will-change: transform, opacity;
+            opacity: 0; box-shadow: 0 0 20px var(--glow); will-change: transform, opacity;
         }
-        @keyframes splash {
-            0% { width: 0; height: 0; opacity: 0.8; transform: scale(0); }
-            100% { width: 200vmin; height: 200vmin; opacity: 0; transform: scale(1); }
-        }
+        @keyframes splash { 0% { width: 0; height: 0; opacity: 0.8; transform: scale(0); } 100% { width: 200vmin; height: 200vmin; opacity: 0; transform: scale(1); } }
 
-        .view-layer { 
-            position: absolute; display: flex; flex-direction: column; align-items: center; 
-            width: 100%; height: 100%; justify-content: center; 
-            transition: opacity 0.6s ease; background: transparent; 
-        }
+        .view-layer { position: absolute; display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; justify-content: center; transition: opacity 0.6s ease; background: transparent; }
         .hidden { display: none !important; opacity: 0; }
 
-        .ghost-rune { 
-            position: absolute; pointer-events: none; z-index: 1; 
-            filter: blur(1px); will-change: transform, opacity;
-            animation: drift 6s forwards ease-in-out; 
-        }
-        @keyframes drift { 
-            0% { opacity: 0; transform: translateY(40px) scale(0.8); } 
-            20% { opacity: var(--target-op); }
-            80% { opacity: var(--target-op); }
-            100% { opacity: 0; transform: translateY(-80px) scale(1.2); } 
-        }
+        .ghost-rune { position: absolute; pointer-events: none; z-index: 1; filter: blur(1px); will-change: transform, opacity; animation: drift 6s forwards ease-in-out; font-family: var(--font-sys); }
+        @keyframes drift { 0% { opacity: 0; transform: translateY(40px) scale(0.8); } 20% { opacity: var(--target-op); } 80% { opacity: var(--target-op); } 100% { opacity: 0; transform: translateY(-80px) scale(1.2); } }
 
         .center-group { display: flex; flex-direction: column; align-items: center; cursor: pointer; z-index: 20; transition: 0.6s; }
-        .center-time { font-size: clamp(50px, 12vmin, 90px); color: var(--gold); letter-spacing: 8px; font-weight: 200; }
+        .center-time { font-size: clamp(50px, 12vmin, 90px); color: var(--gold); letter-spacing: 8px; font-weight: 200; font-family: var(--font-sys); }
         .current-rune-main { font-size: 35px; color: var(--text); margin-top: 10px; }
 
-        .rune-marker { 
-            position: absolute; font-size: clamp(20px, 5vmin, 35px); color: var(--dim); 
-            transition: 0.6s; cursor: pointer; z-index: 20;
-        }
+        .rune-marker { position: absolute; font-size: clamp(20px, 5vmin, 35px); color: #2a2a2a; transition: 0.6s; cursor: pointer; z-index: 20; }
         .active-rune { color: var(--gold) !important; filter: drop-shadow(0 0 12px var(--gold)); }
 
         .volva-input { 
-            background: transparent; border: none; border-bottom: 1px solid var(--dim); 
+            background: rgba(10,10,10,0.8); border: 1px solid var(--dim); border-bottom: 1px solid var(--gold); 
             color: white; text-align: center; outline: none; margin-bottom: 50px; 
-            width: 250px; font-size: 24px; letter-spacing: 5px; padding: 15px; z-index: 30;
+            width: 250px; font-size: 20px; letter-spacing: 5px; padding: 15px; z-index: 30; font-family: var(--font-sys);
         }
         .fate-rune-btn { font-size: 90px; color: var(--gold); cursor: pointer; transition: 0.6s; z-index: 30; }
+        .fate-rune-btn:hover { text-shadow: 0 0 20px var(--glow); transform: scale(1.1); }
 
-        .calendar-box { width: 350px; text-align: center; z-index: 30; }
-        .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 15px; color: #444; }
-        .day.today { color: var(--gold); border: 1px solid var(--gold); }
+        .calendar-box { width: 350px; text-align: center; z-index: 30; font-family: var(--font-sys); }
+        .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 15px; color: #555; }
+        .day.today { color: var(--gold); border: 1px solid var(--gold); background: rgba(189,155,93,0.1); }
 
         .oracle-box { 
             position: absolute; top: 120%; width: 300px; padding: 20px; 
-            background: rgba(10,10,10,0.95); border: 1px solid var(--gold); 
-            color: #bbb; font-style: italic; opacity: 0; transition: 1s; 
+            background: rgba(10,10,10,0.95); border: 1px solid var(--dim); 
+            color: var(--gold); font-family: var(--font-sys); font-size: 14px; opacity: 0; transition: 1s; box-shadow: 0 0 30px var(--glow);
         }
         .oracle-box.visible { opacity: 1; transform: translateY(0); }
     </style>
 </head>
 <body>
 
+    <a href="https://nifl-void.github.io/Nifl-Pulse/" class="back-to-pulse">[ ᛟ ] RETURN TO PULSE</a>
+
     <h1 class="main-title">NIFL-<span>CHRONOS</span></h1>
 
-    <div class="ripple-container">
-        <div id="r1" class="ripple"></div>
-        <div id="r2" class="ripple"></div>
-    </div>
+    <div class="ripple-container"><div id="r1" class="ripple"></div><div id="r2" class="ripple"></div></div>
 
     <div class="container">
         <div id="view-time" class="view-layer">
@@ -123,29 +113,23 @@
 
         <div id="view-cal" class="view-layer hidden">
             <div class="calendar-box">
-                <div id="cal-month-name" style="font-size: 32px; color: var(--gold); margin-bottom: 10px;">GÓI</div>
+                <div id="cal-month-name" style="font-size: 32px; color: var(--gold); margin-bottom: 20px;">GÓI</div>
                 <div id="calendar-grid" class="days-grid"></div>
-                <div style="margin-top:20px; color:#222; cursor:pointer;" onclick="toggleGeekMode()">ᚦ</div>
+                <div style="margin-top:30px; color:#555; cursor:pointer; font-size:24px;" onclick="toggleGeekMode()">ᚦ</div>
             </div>
-            <div class="fate-rune-btn" style="font-size: 50px; margin-top: 50px;" onclick="switchView('to-time')">ᚦ</div>
+            <div class="fate-rune-btn" style="font-size: 50px; margin-top: 40px;" onclick="switchView('to-time')">ᛉ</div>
         </div>
     </div>
 
 <script>
     const runes8 = ["ᚠ", "ᚦ", "ᚱ", "ᚷ", "ᚹ", "ᚻ", "ᚾ", "ᛁ"];
     const runesAll = ["ᚠ", "ᚦ", "ᚱ", "ᚷ", "ᚹ", "ᚻ", "ᚾ", "ᛁ", "ᛃ", "ᛈ", "ᛇ", "ᛉ", "ᛊ", "ᛏ", "ᛒ", "ᛖ", "ᛗ", "ᛚ", "ᛜ", "ᛟ", "ᛞ"];
-    let currentMode = 'time';
-    let geekMode = false;
-    let ghostInterval;
+    let currentMode = 'time'; let geekMode = false; let ghostInterval;
 
     function initCircle() {
-        const orbit = document.getElementById('orbit-elements');
-        orbit.innerHTML = '';
+        const orbit = document.getElementById('orbit-elements'); orbit.innerHTML = '';
         runes8.forEach((r, i) => {
-            const el = document.createElement('div');
-            el.className = 'rune-marker';
-            el.id = `rune-${i}`;
-            el.textContent = r;
+            const el = document.createElement('div'); el.className = 'rune-marker'; el.id = `rune-${i}`; el.textContent = r;
             const angle = (i * 45 - 90) * Math.PI / 180;
             el.style.left = `calc(50% + ${Math.cos(angle)*36}vmin - 20px)`;
             el.style.top = `calc(50% + ${Math.sin(angle)*36}vmin - 20px)`;
@@ -154,57 +138,35 @@
     }
 
     function spawnGhostRune() {
-        const ghost = document.createElement('div');
-        ghost.className = 'ghost-rune';
+        const ghost = document.createElement('div'); ghost.className = 'ghost-rune';
         ghost.textContent = runesAll[Math.floor(Math.random() * runesAll.length)];
-        ghost.style.left = Math.random() * 95 + "vw";
-        ghost.style.top = Math.random() * 95 + "vh";
-        const colors = ["#bd9b5d", "#ffffff", "#555555", "#222222"];
+        ghost.style.left = Math.random() * 95 + "vw"; ghost.style.top = Math.random() * 95 + "vh";
+        const colors = ["#bd9b5d", "#ffffff", "#333333", "#1a1a1a"];
         ghost.style.color = colors[Math.floor(Math.random() * colors.length)];
         ghost.style.fontSize = (Math.random() * 40 + 20) + "px";
         ghost.style.setProperty('--target-op', Math.random() * 0.4 + 0.1);
-        document.body.appendChild(ghost);
-        setTimeout(() => ghost.remove(), 6000);
+        document.body.appendChild(ghost); setTimeout(() => ghost.remove(), 6000);
     }
 
     function switchView(target) {
         [1, 2].forEach(i => {
-            const r = document.getElementById(`r${i}`);
-            r.style.animation = 'none'; void r.offsetWidth;
+            const r = document.getElementById(`r${i}`); r.style.animation = 'none'; void r.offsetWidth;
             r.style.animation = `splash 1.2s cubic-bezier(0.1, 0, 0.3, 1) ${i*0.15}s forwards`;
         });
-
         setTimeout(() => {
-            document.querySelectorAll('.view-layer').forEach(l => l.classList.add('hidden'));
-            clearInterval(ghostInterval);
-
-            if (target === 'to-volva') {
-                document.getElementById('view-volva').classList.remove('hidden');
-                currentMode = 'volva';
-                ghostInterval = setInterval(spawnGhostRune, 400);
-            } else if (target === 'to-cal') {
-                document.getElementById('view-cal').classList.remove('hidden');
-                renderCalendar();
-                currentMode = 'cal';
-                ghostInterval = setInterval(spawnGhostRune, 500);
-            } else {
-                document.getElementById('view-time').classList.remove('hidden');
-                currentMode = 'time';
-                initCircle();
-                update();
-            }
+            document.querySelectorAll('.view-layer').forEach(l => l.classList.add('hidden')); clearInterval(ghostInterval);
+            if (target === 'to-volva') { document.getElementById('view-volva').classList.remove('hidden'); currentMode = 'volva'; ghostInterval = setInterval(spawnGhostRune, 400); }
+            else if (target === 'to-cal') { document.getElementById('view-cal').classList.remove('hidden'); renderCalendar(); currentMode = 'cal'; ghostInterval = setInterval(spawnGhostRune, 500); }
+            else { document.getElementById('view-time').classList.remove('hidden'); currentMode = 'time'; initCircle(); update(); }
         }, 500);
     }
 
     function renderCalendar() {
-        const now = new Date();
-        const grid = document.getElementById('calendar-grid'); grid.innerHTML = '';
+        const now = new Date(); const grid = document.getElementById('calendar-grid'); grid.innerHTML = '';
         const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
         for (let i = 1; i <= daysInMonth; i++) {
-            const d = document.createElement('div');
-            d.className = 'day' + (i === now.getDate() ? ' today' : '');
-            d.textContent = geekMode ? runesAll[i % 20] : i;
-            grid.appendChild(d);
+            const d = document.createElement('div'); d.className = 'day' + (i === now.getDate() ? ' today' : '');
+            d.textContent = geekMode ? runesAll[i % 20] : i; grid.appendChild(d);
         }
     }
 
@@ -212,8 +174,7 @@
 
     function generateFate() {
         const box = document.getElementById('oracle-box');
-        box.textContent = "Osud vlní tvou cestu k nečekaným břehům.";
-        box.classList.add('visible');
+        box.textContent = "Osud vlní tvou cestu k nečekaným břehům."; box.classList.add('visible');
         for(let i=0; i<12; i++) setTimeout(spawnGhostRune, i*100);
         setTimeout(() => box.classList.remove('visible'), 6000);
     }
@@ -221,20 +182,12 @@
     function update() {
         if (currentMode !== 'time') return;
         const now = new Date();
-        document.getElementById('clock-display').textContent = 
-            now.getHours().toString().padStart(2, '0') + ":" + 
-            now.getMinutes().toString().padStart(2, '0');
+        document.getElementById('clock-display').textContent = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
         const hlidkaIdx = Math.floor(now.getHours() / 3) % 8;
         document.getElementById('main-current-rune').textContent = runes8[hlidkaIdx];
-        for(let i=0; i<8; i++) {
-            const el = document.getElementById(`rune-${i}`);
-            if (el) el.classList.toggle('active-rune', i === hlidkaIdx);
-        }
+        for(let i=0; i<8; i++) { const el = document.getElementById(`rune-${i}`); if (el) el.classList.toggle('active-rune', i === hlidkaIdx); }
     }
-
-    setInterval(update, 1000);
-    initCircle();
-    update();
+    setInterval(update, 1000); initCircle(); update();
 </script>
 </body>
 </html>
