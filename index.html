@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        :root { --bg: #000; --ice: #c0e0e0; --gold: #d4af37; --dim: #222; }
+        body { background: var(--bg); color: var(--ice); font-family: monospace; margin: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; overflow: hidden; }
+        
+        .header { margin-top: 20px; color: #555; transition: all 0.4s ease; font-size: 1.2rem; letter-spacing: 3px; }
+        .header span { color: var(--gold); }
+        .header:hover { transform: scale(1.1); color: var(--gold); }
+
+        .main-stage { position: relative; width: 500px; height: 500px; display: flex; justify-content: center; align-items: center; }
+
+        /* Vodní vlnka (Žbluňk) */
+        .ripple {
+            position: absolute;
+            border: 2px solid var(--ice);
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+        @keyframes splash {
+            0% { width: 0; height: 0; opacity: 0.5; border-width: 4px; }
+            100% { width: 500px; height: 500px; opacity: 0; border-width: 1px; }
+        }
+
+        /* Vrstvy */
+        .view { position: absolute; transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); text-align: center; }
+        .hidden { opacity: 0; transform: scale(0.8) blur(10px); pointer-events: none; }
+
+        /* Hodiny */
+        .center-display { cursor: pointer; z-index: 10; pointer-events: auto; }
+        #digital-time { font-size: 2.8rem; font-weight: bold; }
+        .rune-marker { position: absolute; font-size: 1.8rem; color: var(--dim); transition: all 0.5s; }
+        .active-rune { color: var(--gold); text-shadow: 0 0 15px var(--gold); transform: scale(1.3); }
+
+        /* Kalendář & Věštírna */
+        .völva-box { background: rgba(10, 10, 10, 0.9); padding: 20px; border: 1px solid var(--dim); border-radius: 5px; width: 320px; }
+        input { background: #111; border: 1px solid var(--gold); color: var(--ice); padding: 5px; text-align: center; width: 80%; margin: 10px 0; }
+        button { background: var(--gold); border: none; padding: 8px 15px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        #vestba-vysledek { margin-top: 20px; color: var(--gold); font-style: italic; min-height: 50px; }
+    </style>
+</head>
+<body>
+
+<div class="header">Nifl-<span>Chronos</span></div>
+
+<div class="main-stage" id="stage">
+    <div id="ripple-effect" class="ripple"></div>
+
+    <div id="view-clock" class="view">
+        <div class="center-display" onclick="triggerSplash('to-cal')">
+            <div id="digital-time">00:00:00</div>
+            <div id="hlidka-name" style="color:var(--gold); font-size:0.8rem; letter-spacing:4px;">–</div>
+            <div id="moon">🌑</div>
+        </div>
+        <div id="runes-orbit"></div>
+    </div>
+
+    <div id="view-calendar" class="view hidden">
+        <div class="völva-box">
+            <h3 style="color:var(--gold); margin:0;">RÍMSTOKKUR</h3>
+            <p style="font-size:0.7rem; opacity:0.5;">Příští blót: Zimní noci</p>
+            <hr style="border:0; border-top:1px solid #222; margin:15px 0;">
+            
+            <h3 style="color:var(--gold); margin:0;">VÖLVA</h3>
+            <input type="text" id="birth-date" placeholder="DD.MM.RRRR">
+            <br>
+            <button onclick="generujVestbu()">VYVOLAT RUNU</button>
+            <div id="vestba-vysledek">Zadej datum a ptej se osudu...</div>
+            
+            <p onclick="triggerSplash('to-clock')" style="cursor:pointer; font-size:0.7rem; margin-top:20px; opacity:0.5;">[ ZPĚT K ČASU ]</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const runicIcons = ["ᛈ", "ᚦ", "ᛞ", "ᚠ", "ᛋ", "ᚱ", "ᚷ", "ᛁ"];
+    const hlidky = { cs: ["Půlnoc", "Předúsvit", "Vstávání", "Dopoledne", "Poledne", "Odpoledne", "Večer", "Spánek"], en: ["Midnight", "Before Dawn", "Rising", "Day Meal", "Midday", "Afternoon", "Evening", "Sleep"] };
+    const lang = (navigator.language || 'cs').startsWith('cs') ? 'cs' : 'en';
+
+    function triggerSplash(target) {
+        // Spuštění vlnky
+        const rip = document.getElementById('ripple-effect');
+        rip.style.animation = 'none';
+        rip.offsetHeight; /* trigger reflow */
+        rip.style.animation = 'splash 0.8s ease-out';
+
+        // Přepnutí pohledu
+        setTimeout(() => {
+            if(target === 'to-cal') {
+                document.getElementById('view-clock').classList.add('hidden');
+                document.getElementById('view-calendar').classList.remove('hidden');
+            } else {
+                document.getElementById('view-calendar').classList.add('hidden');
+                document.getElementById('view-clock').classList.remove('hidden');
+            }
+        }, 200);
+    }
+
+    function generujVestbu() {
+        const input = document.getElementById('birth-date').value;
+        if(!input) return;
+        
+        // Jednoduchý "žbluňk" efekt pro výsledek
+        const res = document.getElementById('vestba-vysledek');
+        res.style.opacity = 0;
+        
+        setTimeout(() => {
+            const runyOsudu = ["Ansuz (Moudrost)", "Uruz (Síla)", "Thurisaz (Ochrana)", "Raidho (Cesta)", "Kenaz (Světlo)", "Gebo (Dar)"];
+            const index = Math.abs(input.split('.').reduce((a,b) => a + parseInt(b), 0)) % runyOsudu.length;
+            res.innerHTML = `Tvá runa pro tento den:<br><b style="font-size:1.2rem;">${runyOsudu[index]}</b>`;
+            res.style.opacity = 1;
+        }, 400);
+    }
+
+    function init() {
+        const orbit = document.getElementById('runes-orbit');
+        runicIcons.forEach((rune, i) => {
+            const el = document.createElement('div');
+            el.className = 'rune-marker'; el.id = `rune-${i}`; el.textContent = rune;
+            const rad = (i * 45 - 90) * Math.PI / 180;
+            const x = Math.cos(rad) * 180; const y = Math.sin(rad) * 180;
+            el.style.left = `calc(50% + ${x}px - 20px)`; el.style.top = `calc(50% + ${y}px - 20px)`;
+            orbit.appendChild(el);
+        });
+    }
+
+    function update() {
+        const now = new Date();
+        document.getElementById('digital-time').textContent = now.toLocaleTimeString('cs-CZ');
+        const hlidkaIdx = Math.floor(now.getHours() / 3) % 8;
+        document.getElementById('hlidka-name').textContent = hlidky[lang][hlidkaIdx];
+        runicIcons.forEach((_, i) => document.getElementById(`rune-${i}`).classList.toggle('active-rune', i === hlidkaIdx));
+    }
+
+    init(); setInterval(update, 1000); update();
+</script>
+</body>
+</html>
